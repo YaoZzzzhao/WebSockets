@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>WebSockets</title>
+</head>
+<body>
+<button onclick="Open()">Connect</button>
+<table>
+    <tr>
+        <th>Total</th>
+        <th>In-Progress</th>
+        <th>Completed</th>
+        <th>Cancelled</th>
+        <th>Null</th>
+    </tr>
+    <tr >
+        <td id="total"></td>
+        <td id="inp"></td>
+        <td id="comp"></td>
+        <td id="cc"></td>
+        <td id="null"></td>
+    </tr>
+</table>
+<!--<script type="text/javascript" src="http://cdn.bootcss.com/sockjs-client/1.1.1/sockjs.js"></script>-->
+
+<!--<div id = "union"><textarea></textarea></div>-->
+
+<div>
+    <p>Date/Time: <span id="datetime"></span></p>
+
+    <script>
+var dt = new Date();
+document.getElementById("datetime").innerHTML = dt.toLocaleString();
+</script>
+</div>
+
+<div>
+    <button onclick="Close()">Disconnect</button>
+</div>
+
+<script>
+
+
+    var websocket = null;
+      if ('WebSocket' in window) {
+          websocket = new WebSocket('ws://localhost:8080/socket');  //open a WebSocket Url
+      }
+      else {
+<!--          websocket = new SockJS("http://localhost:8080/socketjs");-->
+            console.log("Not supported.");
+      }
+
+      websocket.onerror = function () {
+          console.log("error");
+      };
+
+      function Open() {
+            websocket.onopen;
+            startHttpQuery();
+            console.log("WebSocket connected successfully!");
+      }
+
+<!--Once the database updated, back end side will send a message to WebSocket, -->
+<!--and this function will be called by WS in real-time;-->
+      websocket.onmessage = function (event) {
+          startHttpQuery();
+      }
+
+      function Close() {
+          websocket.onclose;
+          console.log("close");
+
+      }
+
+
+    function getText(url){
+        return new Promise( function(resolve, reject){
+            var xhr = new XMLHttpRequest();
+            xhr.open('get',url,true);
+            xhr.responseType ='text';
+            xhr.onload =  function(){
+                var status = xhr.status;
+                if (status == 200) {
+                    resolve(xhr.response);
+                } else {
+                    reject(status);
+                }
+            };
+            xhr.send();
+        });
+    };
+
+<!--    funciton getUnion(){-->
+<!--    var url = "http://localhost:8080/getUnion";-->
+<!--    getText(url).then(function(data)-->
+<!--    }-->
+
+    function startHttpQuery(){
+        var url1= "http://localhost:8080/getTotal";
+        var url2= "http://localhost:8080/getInprogress";
+        var url3= "http://localhost:8080/getCompleted";
+        var url4= "http://localhost:8080/getCancelled";
+        var url5= "http://localhost:8080/getNull";
+
+        getText(url1).then( function(data){
+            var info=data;
+
+            document.getElementById("total").innerHTML = info;
+        },
+        function(status) {
+            alert('Something went wrong.');
+        });
+        getText(url2).then( function(data){
+            var info=data;
+
+            document.getElementById("inp").innerHTML = info;
+        },
+        function(status) {
+            alert('Something went wrong.');
+        });
+        getText(url3).then( function(data){
+            var info=data;
+
+            document.getElementById("comp").innerHTML = info;
+        },
+        function(status) {
+            alert('Something went wrong.');
+        });
+        getText(url4).then( function(data){
+            var info=data;
+
+            document.getElementById("cc").innerHTML = info;
+        },
+        function(status) {
+            alert('Something went wrong.');
+        });
+        getText(url5).then( function(data){
+            var info=data;
+
+            document.getElementById("null").innerHTML = info;
+        },
+        function(status) {
+            alert('Something went wrong.');
+        });
+    }
+</script>
+</body>
+</html>
